@@ -1,13 +1,17 @@
 package com.notenoughmail.configjs;
 
+import com.notenoughmail.configjs.hacks.EnumWriter;
 import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.IExtensibleEnum;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConfigEventJS extends EventJS {
@@ -25,7 +29,7 @@ public class ConfigEventJS extends EventJS {
         return name + ".toml";
     }
 
-    @Info(value = "Sets the name of the config file", params = @Param(name = "name"))
+    @Info(value = "Sets the name of the config file", params = @Param(name = "name", value = "The name of the file, excluding .toml"))
     public void setName(String name) {
         this.name = name;
     }
@@ -35,12 +39,12 @@ public class ConfigEventJS extends EventJS {
         pop(1);
     }
 
-    @Info(value = "Moves the config left by the specified amount of tabs", params = @Param(name = "amount"))
+    @Info(value = "Moves the config left by the specified amount of tabs", params = @Param(name = "amount", value = "The number of tabs to move the config by"))
     public void pop(int amount) {
         builder.pop(amount);
     }
 
-    @Info(value = "Moves the config right by a tab under the specified path, paths can be joined with . to shift multiple times", params = @Param(name = "path"))
+    @Info(value = "Moves the config right by a tab under the specified path, paths can be joined with . to shift multiple times", params = @Param(name = "path", value = "The path to move the config under"))
     public void push(String path) {
         builder.push(path);
     }
@@ -88,28 +92,19 @@ public class ConfigEventJS extends EventJS {
         return builder.define(name, defaultValue);
     }
 
-    // This seems to occasionally cause issues with probejs' aggressive dumping
     @Info(value = "Adds and returns an EnumValue config", params = {
             @Param(name = "name", value = "The name of the option"),
             @Param(name = "defaultValue", value = "The default value, must be included in enumValues"),
-            @Param(name = "enumValues", value = "A list of all allowed values, will always include a 'NULL' value as its first option")
+            @Param(name = "enumValues", value = "A list of all allowed values")
     })
-    public ForgeConfigSpec.EnumValue<?> enumValue(String name, String defaultValue, List<String> enumValues) {
-        enum Enum implements IExtensibleEnum {
-            NULL;
-
-            @HideFromJS
-            public static Enum create(String name) {
-                throw new IllegalStateException("Enum not extended");
-            }
-        }
-        for (String value : enumValues) {
-            Enum.create(value);
-        }
-        return builder.defineEnum(name, Enum.valueOf(defaultValue));
+    @Generics(value = {Enum.class, Enum.class, String.class})
+    public <T extends Enum<T>> ForgeConfigSpec.EnumValue<T> enumValue(String name, String defaultValue, List<String> enumValues) {
+        final Class<T> enumClass = EnumWriter.getNewEnum(enumValues);
+        var value = Enum.valueOf(enumClass, defaultValue);
+        return builder.defineEnum(name, value);
     }
 
-    @Info(value = "Adds and returns an EnumValue config, with the enum calss being pulled from the provided default enum value", params = {
+    @Info(value = "Adds and returns an EnumValue config, with the enum class being pulled from the provided default enum value", params = {
             @Param(name = "name", value = "The name of the option"),
             @Param(name = "defaultValue", value = "The default value")
     })
