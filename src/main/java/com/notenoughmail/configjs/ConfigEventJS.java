@@ -100,8 +100,7 @@ public class ConfigEventJS extends EventJS {
     @Generics(value = {Enum.class, Enum.class, String.class})
     public <T extends Enum<T>> ForgeConfigSpec.EnumValue<T> enumValue(String name, String defaultValue, List<String> enumValues) {
         final Class<T> enumClass = EnumWriter.getNewEnum(enumValues);
-        var value = Enum.valueOf(enumClass, defaultValue);
-        return builder.defineEnum(name, value);
+        return builder.defineEnum(name, Enum.valueOf(enumClass, defaultValue));
     }
 
     @Info(value = "Adds and returns an EnumValue config, with the enum class being pulled from the provided default enum value", params = {

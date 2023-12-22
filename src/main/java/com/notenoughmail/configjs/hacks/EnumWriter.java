@@ -46,20 +46,13 @@ public class EnumWriter {
 
         // Create #values(), required for the JVM/Enum#valueOf to recognize it as an enum
         cfw.startMethod("values", "()" + arrayClassType, valuesAccess);
-        if (numberOfValues < 6) {
-            if (numberOfValues == 5) {
-                cfw.add(ByteCode.ICONST_5);
-            } else if (numberOfValues == 4) {
-                cfw.add(ByteCode.ICONST_4);
-            } else if (numberOfValues == 3) {
-                cfw.add(ByteCode.ICONST_3);
-            } else if (numberOfValues == 2) {
-                cfw.add(ByteCode.ICONST_2);
-            } else {
-                throw new IllegalArgumentException("Enum should have 2 or more values!");
-            }
-        } else {
-            cfw.add(ByteCode.BIPUSH, numberOfValues);
+        switch (numberOfValues) {
+            case 5 -> cfw.add(ByteCode.ICONST_5);
+            case 4 -> cfw.add(ByteCode.ICONST_4);
+            case 3 -> cfw.add(ByteCode.ICONST_3);
+            case 2 -> cfw.add(ByteCode.ICONST_2);
+            case 1, 0 -> throw new IllegalArgumentException("Enum should have 2 or more values!");
+            default -> cfw.add(ByteCode.BIPUSH, numberOfValues);
         }
         cfw.add(ByteCode.ANEWARRAY, classNameOp);
         for (int i = 0 ; i < numberOfValues ; i++) {

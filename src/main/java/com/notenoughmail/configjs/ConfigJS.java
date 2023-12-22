@@ -3,15 +3,9 @@ package com.notenoughmail.configjs;
 import com.mojang.logging.LogUtils;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
-import dev.latvian.mods.rhino.classfile.ByteCode;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.slf4j.Logger;
-
-import java.io.IOException;
 
 @Mod(ConfigJS.MODID)
 public class ConfigJS {
