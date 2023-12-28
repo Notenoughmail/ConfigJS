@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ConfigEventJS extends EventJS {
 
     private final ForgeConfigSpec.Builder builder;
@@ -55,7 +56,7 @@ public class ConfigEventJS extends EventJS {
     }
 
     @Info(value = "Adds and returns an IntValue config", params = {
-            @Param(name = "name", value = "The name of the option"),
+            @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value"),
             @Param(name = "min", value = "The minimum allowable value"),
             @Param(name = "max", value = "The maximum allowable value")
@@ -65,7 +66,7 @@ public class ConfigEventJS extends EventJS {
     }
 
     @Info(value = "Adds and returns a LongValue config", params = {
-            @Param(name = "name", value = "The name of the option"),
+            @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value"),
             @Param(name = "min", value = "The minimum allowable value"),
             @Param(name = "max", value = "The maximum allowable value")
@@ -75,7 +76,7 @@ public class ConfigEventJS extends EventJS {
     }
 
     @Info(value = "Adds and returns a DoubleValue config", params = {
-            @Param(name = "name", value = "The name of the option"),
+            @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value"),
             @Param(name = "min", value = "The minimum allowable value"),
             @Param(name = "max", value = "The maximum allowable value")
@@ -85,7 +86,7 @@ public class ConfigEventJS extends EventJS {
     }
 
     @Info(value = "Adds and returns a BooleanValue config", params = {
-            @Param(name = "name", value = "The name of the option"),
+            @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value")
     })
     public ForgeConfigSpec.BooleanValue booleanValue(String name, boolean defaultValue) {
@@ -93,21 +94,21 @@ public class ConfigEventJS extends EventJS {
     }
 
     @Info(value = "Adds and returns an EnumValue config", params = {
-            @Param(name = "name", value = "The name of the option"),
+            @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value, must be included in enumValues"),
             @Param(name = "enumValues", value = "A list of all allowed values")
     })
-    @Generics(value = {Enum.class, Enum.class, String.class})
-    public <T extends Enum<T>> ForgeConfigSpec.EnumValue<T> enumValue(String name, String defaultValue, List<String> enumValues) {
+    @Generics(value = {Enum.class, String.class})
+    public <T extends Enum<T>> ForgeConfigSpec.EnumValue<?> enumValue(String name, String defaultValue, List<String> enumValues) {
         final Class<T> enumClass = EnumWriter.getNewEnum(enumValues);
         return builder.defineEnum(name, Enum.valueOf(enumClass, defaultValue));
     }
 
     @Info(value = "Adds and returns an EnumValue config, with the enum class being pulled from the provided default enum value", params = {
-            @Param(name = "name", value = "The name of the option"),
-            @Param(name = "defaultValue", value = "The default value")
+            @Param(name = "name", value = "The name of the config option"),
+            @Param(name = "defaultValue", value = "The default value, must be an enum object")
     })
-    public <T extends Enum<T>> ForgeConfigSpec.EnumValue<T> enumValue(String name, T defaultValue) {
-        return builder.defineEnum(name, defaultValue);
+    public <T extends Enum<T>> ForgeConfigSpec.EnumValue<?> enumValue(String name, Object defaultValue) {
+        return builder.defineEnum(name, (T) defaultValue); // Cannot use T straight out because Kube likes to write the type recursively and throw a StackOverflowError because of it
     }
 }
