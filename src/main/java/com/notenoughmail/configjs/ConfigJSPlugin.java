@@ -6,30 +6,42 @@ import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.util.ClassFilter;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class ConfigJSPlugin extends KubeJSPlugin {
 
     @Override
     public void initStartup() {
+        // The mod container shuffling is required in order for mods like Forge Config Screens
+        // and Create to recognize the configs as belonging to ConfigJS
+        final ModContainer activeContainer = ModLoadingContext.get().getActiveContainer();
+        ModList.get().getModContainerById(ConfigJS.MODID).ifPresent(container -> {
+            ModLoadingContext.get().setActiveContainer(container);
+        });
+
         if (ConfigJS.common.hasListeners()) {
             ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
             ConfigEventJS event = new ConfigEventJS(builder, "common");
             ConfigJS.common.post(event);
-            ConfigJS.loadingContext.registerConfig(ModConfig.Type.COMMON, builder.build(), event.getName());
+            ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, builder.build(), event.getName());
         }
         if (ConfigJS.server.hasListeners()) {
             ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
             ConfigEventJS event = new ConfigEventJS(builder, "server");
             ConfigJS.server.post(event);
-            ConfigJS.loadingContext.registerConfig(ModConfig.Type.SERVER, builder.build(), event.getName());
+            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, builder.build(), event.getName());
         }
         if (ConfigJS.client.hasListeners()) {
             ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
             ConfigEventJS event = new ConfigEventJS(builder, "client");
             ConfigJS.client.post(event);
-            ConfigJS.loadingContext.registerConfig(ModConfig.Type.CLIENT, builder.build(), event.getName());
+            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, builder.build(), event.getName());
         }
+
+        ModLoadingContext.get().setActiveContainer(activeContainer);
     }
 
     @Override
