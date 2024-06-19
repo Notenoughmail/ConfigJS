@@ -117,7 +117,7 @@ public class ConfigEventJS extends EventJS {
     })
     @Generics(Enum.class)
     public <T extends Enum<?>> ForgeConfigSpec.EnumValue<?> enumValue(String name, T defaultValue) {
-        return builder.defineEnum(name, UtilsJS.cast(defaultValue)); // Cast because the type param cannot be made <T extends Enum<T>> becasue then Kube crashes from writing that recursively
+        return builder.defineEnum(name, UtilsJS.cast(defaultValue)); // Cast because the type param cannot be made <T extends Enum<T>> because then Kube crashes from writing that recursively
     }
 
     @Info(value = "Adds and returns a string config value", params = {
@@ -126,7 +126,7 @@ public class ConfigEventJS extends EventJS {
     })
     @Generics(String.class)
     public ForgeConfigSpec.ConfigValue<String> stringValue(String name, String defaultValue) {
-        return builder.define(name, defaultValue);
+        return stringValueWithPredicate(name, defaultValue, s -> !s.isEmpty());
     }
 
     @Info(value = "Adds a returns a string config option with a validator for the configured value", params = {
