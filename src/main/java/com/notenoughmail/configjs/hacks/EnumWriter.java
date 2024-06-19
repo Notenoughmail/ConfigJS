@@ -6,6 +6,7 @@ import dev.latvian.mods.rhino.GeneratedClassLoader;
 import dev.latvian.mods.rhino.classfile.ByteCode;
 import dev.latvian.mods.rhino.classfile.ClassFileWriter;
 import org.objectweb.asm.Opcodes;
+import dev.latvian.mods.kubejs.script.ScriptType;
 
 import java.util.List;
 
@@ -29,13 +30,13 @@ public class EnumWriter {
     private static final String baseName = EnumWriter.class.getPackageName() + ".GeneratedConfigEnum";
     private static GeneratedClassLoader loader;
 
-    public static <T extends Enum<T>> Class<T> getNewEnum(List<String> values) {
+    public static <T extends Enum<T>> Class<T> getNewEnum(String[] values) {
         // Setup basic values
         final String className = baseName + classNum++;
         final String classNameOp = className.replace('.', '/');
         final String classType = "L" + classNameOp + ";";
         final String arrayClassType = "[" + classType;
-        final int numberOfValues = values.size();
+        final int numberOfValues = values.length;
 
         // Create class, add enum constants
         final ClassFileWriter cfw = new ClassFileWriter(className, Enum.class.getName(), null);
@@ -58,7 +59,7 @@ public class EnumWriter {
         for (int i = 0 ; i < numberOfValues ; i++) {
             cfw.add(ByteCode.DUP);
             addConstOp(cfw, i);
-            cfw.add(Opcodes.GETSTATIC, classNameOp, values.get(i), classType);
+            cfw.add(Opcodes.GETSTATIC, classNameOp, values[i], classType);
             cfw.add(ByteCode.AASTORE);
         }
         cfw.add(ByteCode.ARETURN);
@@ -71,6 +72,7 @@ public class EnumWriter {
         cfw.addILoad(2);
         cfw.addInvoke(ByteCode.INVOKESPECIAL, "java/lang/Enum", "<init>", "(Ljava/lang/String;I)V");
         cfw.add(ByteCode.RETURN);
+        // LOCALVARIABLE this $classType L0 L1 0
         cfw.stopMethod((short) 3);
 
         // Class init
@@ -78,10 +80,10 @@ public class EnumWriter {
         for (int i = 0 ; i < numberOfValues ; i++) {
             cfw.add(ByteCode.NEW, classNameOp);
             cfw.add(ByteCode.DUP);
-            cfw.addLoadConstant(values.get(i));
+            cfw.addLoadConstant(values[i]);
             addConstOp(cfw, i);
             cfw.addInvoke(ByteCode.INVOKESPECIAL, classNameOp, "<init>", "(Ljava/lang/String;I)V");
-            cfw.add(Opcodes.PUTSTATIC, classNameOp, values.get(i), classType);
+            cfw.add(Opcodes.PUTSTATIC, classNameOp, values[i], classType);
         }
         cfw.add(ByteCode.RETURN);
         cfw.stopMethod((short) 0);
@@ -89,7 +91,7 @@ public class EnumWriter {
         // Add class to the class loader
         if (loader == null) {
             // Defer creation because there's no reason to make it if no ever makes an enum
-            loader = Context.enter().createClassLoader(ConfigJS.class.getClassLoader());
+            loader = ScriptType.STARTUP.manager.get().context.createClassLoader(ConfigJS.class.getClassLoader());
         }
         final Class<?> clazz = loader.defineClass(className, cfw.toByteArray());
         loader.linkClass(clazz);

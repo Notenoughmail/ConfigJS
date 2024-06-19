@@ -17,9 +17,5 @@ public class ConfigJS {
     public static final EventHandler server = GROUP.startup("server", () -> ConfigEventJS.class);
     public static final EventHandler client = GROUP.startup("client", () -> ConfigEventJS.class);
 
-    public static ModLoadingContext loadingContext = null;
-
-    public ConfigJS() {
-        loadingContext = ModLoadingContext.get();
-    }
+    public ConfigJS() {}
 }

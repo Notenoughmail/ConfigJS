@@ -18,9 +18,7 @@ public class ConfigJSPlugin extends KubeJSPlugin {
         // The mod container shuffling is required in order for mods like Forge Config Screens
         // and Create to recognize the configs as belonging to ConfigJS
         final ModContainer activeContainer = ModLoadingContext.get().getActiveContainer();
-        ModList.get().getModContainerById(ConfigJS.MODID).ifPresent(container -> {
-            ModLoadingContext.get().setActiveContainer(container);
-        });
+        ModList.get().getModContainerById(ConfigJS.MODID).ifPresent(ModLoadingContext.get()::setActiveContainer);
 
         if (ConfigJS.common.hasListeners()) {
             ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();

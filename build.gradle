@@ -113,7 +113,7 @@ dependencies {
     // Probe
     runtimeOnly fg.deobf("curse.maven:probejs-585406:${probejs_version}")
     // Test editing through external mod
-    implementation fg.deobf("curse.maven:config-menus-forge-544048:${config_menus_version}")
+    runtimeOnly fg.deobf("curse.maven:config-menus-forge-544048:${config_menus_version}")
 
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
@@ -167,4 +167,5 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
 }
