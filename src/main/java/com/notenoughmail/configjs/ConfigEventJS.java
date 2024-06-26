@@ -9,6 +9,7 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraftforge.common.ForgeConfigSpec;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -132,11 +133,11 @@ public class ConfigEventJS extends EventJS {
     @Info(value = "Adds a returns a string config option with a validator for the configured value", params = {
             @Param(name = "name", value = "The name of the config option"),
             @Param(name = "defaultValue", value = "The default value of the config option"),
-            @Param(name = "validator", value = "The validation for the configured value")
+            @Param(name = "validator", value = "The validator for the config value")
     })
     @Generics(String.class)
     public ForgeConfigSpec.ConfigValue<String> stringValueWithPredicate(String name, String defaultValue, Predicate<String> validator) {
-        return builder.define(name, defaultValue, o -> o instanceof CharSequence seq && validator.test(seq.toString()));
+        return builder.define(name, defaultValue, o -> o instanceof CharSequence && validator.test(o.toString()));
     }
 
     @Info(value = "Adds and returns a string config value option", params = {
@@ -148,5 +149,15 @@ public class ConfigEventJS extends EventJS {
     public ForgeConfigSpec.ConfigValue<String> stringValue(String name, String defaultValue, String[] allowedValues) {
         comment("Allowed Values: " + String.join(", ", allowedValues));
         return builder.define(name, defaultValue, o -> o instanceof CharSequence seq && Set.of(allowedValues).contains(seq.toString()));
+    }
+
+    @Info(value = "Adds and returns a string list config value option", params = {
+            @Param(name = "name", value = "The name of the config option"),
+            @Param(name = "defaultValues", value = "The default values of the config option"),
+            @Param(name = "validator", value = "The validator for the elements of the config's elements")
+    })
+    @Generics(value = {List.class, String.class})
+    public ForgeConfigSpec.ConfigValue<List<? extends String>> stringListValue(String name, String[] defaultValues, Predicate<String> validator) {
+        return builder.defineListAllowEmpty(name, List.of(defaultValues), o -> o instanceof CharSequence && validator.test(o.toString()));
     }
 }
