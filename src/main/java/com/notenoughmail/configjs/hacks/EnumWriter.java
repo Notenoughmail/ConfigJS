@@ -1,14 +1,13 @@
 package com.notenoughmail.configjs.hacks;
 
 import com.notenoughmail.configjs.ConfigJS;
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.rhino.Context;
 import dev.latvian.mods.rhino.GeneratedClassLoader;
 import dev.latvian.mods.rhino.classfile.ByteCode;
 import dev.latvian.mods.rhino.classfile.ClassFileWriter;
 import org.objectweb.asm.Opcodes;
 import dev.latvian.mods.kubejs.script.ScriptType;
-
-import java.util.List;
 
 /**
  * This class is a specially crafted wrapper around Rhino's {@link ClassFileWriter} that
@@ -30,7 +29,7 @@ public class EnumWriter {
     private static final String baseName = EnumWriter.class.getPackageName() + ".GeneratedConfigEnum";
     private static GeneratedClassLoader loader;
 
-    public static <T extends Enum<T>> Class<T> getNewEnum(String[] values) {
+    public static <T extends Enum<T>> Class<T> getNewEnum(Context ctx, String[] values) {
         // Setup basic values
         final String className = baseName + classNum++;
         final String classNameOp = className.replace('.', '/');
@@ -91,7 +90,7 @@ public class EnumWriter {
         // Add class to the class loader
         if (loader == null) {
             // Defer creation because there's no reason to make it if no ever makes an enum
-            loader = ScriptType.STARTUP.manager.get().context.createClassLoader(ConfigJS.class.getClassLoader());
+            loader = ctx.createClassLoader(ConfigJS.class.getClassLoader());
         }
         final Class<?> clazz = loader.defineClass(className, cfw.toByteArray());
         loader.linkClass(clazz);

@@ -1,62 +1,45 @@
 package com.notenoughmail.configjs;
 
 import com.notenoughmail.configjs.hacks.EnumWriter;
-import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.script.BindingsEvent;
-import dev.latvian.mods.kubejs.script.ScriptType;
-import dev.latvian.mods.kubejs.util.ClassFilter;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import dev.latvian.mods.kubejs.event.EventGroupRegistry;
+import dev.latvian.mods.kubejs.plugin.ClassFilter;
+import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
+import dev.latvian.mods.kubejs.script.BindingRegistry;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-public class ConfigJSPlugin extends KubeJSPlugin {
+public class ConfigJSPlugin implements KubeJSPlugin {
 
     @Override
     public void initStartup() {
-        // The mod container shuffling is required in order for mods like Forge Config Screens
-        // and Create to recognize the configs as belonging to ConfigJS
-        final ModContainer activeContainer = ModLoadingContext.get().getActiveContainer();
-        ModList.get().getModContainerById(ConfigJS.MODID).ifPresent(ModLoadingContext.get()::setActiveContainer);
-
-        if (ConfigJS.common.hasListeners()) {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-            ConfigEventJS event = new ConfigEventJS(builder, "common");
-            ConfigJS.common.post(event);
-            ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, builder.build(), event.getName());
-        }
-        if (ConfigJS.server.hasListeners()) {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-            ConfigEventJS event = new ConfigEventJS(builder, "server");
-            ConfigJS.server.post(event);
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, builder.build(), event.getName());
-        }
-        if (ConfigJS.client.hasListeners()) {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-            ConfigEventJS event = new ConfigEventJS(builder, "client");
-            ConfigJS.client.post(event);
-            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, builder.build(), event.getName());
-        }
-
-        ModLoadingContext.get().setActiveContainer(activeContainer);
+        ModList.get().getModContainerById(ConfigJS.MODID).ifPresent(container -> {
+            for (ModConfig.Type type : ModConfig.Type.values()) {
+                if (ConfigJS.config.hasListeners(type)) {
+                    final ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+                    KubeConfigEvent event = new KubeConfigEvent(builder, type);
+                    ConfigJS.config.post(event, type);
+                    container.registerConfig(type, builder.build(), event.getName());
+                }
+            }
+        });
     }
 
     @Override
-    public void registerClasses(ScriptType type, ClassFilter filter) {
+    public void registerClasses(ClassFilter filter) {
         filter.deny(ConfigJSPlugin.class);
         filter.deny(ConfigJS.class);
         filter.deny(EnumWriter.class); // Especially this
-        filter.allow(ConfigEventJS.class.getPackageName());
+        filter.allow(KubeConfigEvent.class.getPackageName());
     }
 
     @Override
-    public void registerEvents() {
-        ConfigJS.GROUP.register();
+    public void registerEvents(EventGroupRegistry registry) {
+        registry.register(ConfigJS.GROUP);
     }
 
     @Override
-    public void registerBindings(BindingsEvent event) {
-        event.add("ConfigJS", Bindings.class);
+    public void registerBindings(BindingRegistry bindings) {
+        bindings.add("ConfigJS", Bindings.class);
     }
 }
