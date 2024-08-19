@@ -1,13 +1,11 @@
 package com.notenoughmail.configjs.hacks;
 
 import com.notenoughmail.configjs.ConfigJS;
-import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.rhino.Context;
 import dev.latvian.mods.rhino.GeneratedClassLoader;
 import dev.latvian.mods.rhino.classfile.ByteCode;
 import dev.latvian.mods.rhino.classfile.ClassFileWriter;
 import org.objectweb.asm.Opcodes;
-import dev.latvian.mods.kubejs.script.ScriptType;
 
 /**
  * This class is a specially crafted wrapper around Rhino's {@link ClassFileWriter} that
@@ -89,7 +87,6 @@ public class EnumWriter {
 
         // Add class to the class loader
         if (loader == null) {
-            // Defer creation because there's no reason to make it if no ever makes an enum
             loader = ctx.createClassLoader(ConfigJS.class.getClassLoader());
         }
         final Class<?> clazz = loader.defineClass(className, cfw.toByteArray());

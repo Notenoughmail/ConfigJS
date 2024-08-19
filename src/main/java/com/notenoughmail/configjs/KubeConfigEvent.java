@@ -5,39 +5,39 @@ import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.kubejs.util.UtilsJS;
 import dev.latvian.mods.rhino.Context;
-import dev.latvian.mods.rhino.util.HideFromJS;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-// TODO: Implement config screen translations
 @SuppressWarnings("unused")
 public class KubeConfigEvent implements KubeEvent {
 
     private final ModConfigSpec.Builder builder;
-    private String name;
 
-    public KubeConfigEvent(ModConfigSpec.Builder builder, ModConfig.Type type) {
+    public KubeConfigEvent(ModConfigSpec.Builder builder) {
         this.builder = builder;
-        name = ConfigJS.MODID + "-" + type.name().toLowerCase(Locale.ROOT);
     }
 
-    @HideFromJS
-    public String getName() {
-        return name + ".toml";
-    }
-
-    @Info(value = "Sets the name of the config file", params = @Param(name = "name", value = "The name of the file, excluding .toml"))
-    public KubeConfigEvent setName(String name) {
-        this.name = name;
+    @Info("Sets the lang key for the following item")
+    public KubeConfigEvent translation(String key) {
+        builder.translation(key);
         return this;
+    }
+
+    @Info("Marks the following as requiring a game restart to take effect")
+    public KubeConfigEvent requiresGameRestart() {
+        builder.gameRestart();
+        return this;
+    }
+
+    @Info("Marks the following as requiring a world restart to take effect")
+    public KubeConfigEvent requiresWorldRestart() {
+        builder.worldRestart();
+         return this;
     }
 
     @Info(value = "Moves the config left by a tab")

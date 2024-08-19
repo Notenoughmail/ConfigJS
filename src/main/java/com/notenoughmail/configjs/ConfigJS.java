@@ -14,8 +14,8 @@ public class ConfigJS {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final EventGroup GROUP = EventGroup.of("ConfigsEvent");
-    public static final TargetedEventHandler<ModConfig.Type> config = GROUP.startup("config", () -> KubeConfigEvent.class).requiredTarget(EventTargetType.fromEnum(ModConfig.Type.class));
+    public static final TargetedEventHandler<ModConfig.Type> config = GROUP.startup("register", () -> KubeConfigEvent.class).requiredTarget(EventTargetType.fromEnum(ModConfig.Type.class));
 
-    // TODO: Config Screen, possibly customizable
-    public ConfigJS() {}
+    public ConfigJS() {
+    }
 }
